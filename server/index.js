@@ -19,7 +19,7 @@ if (!dev) {
 
 const proxy = {
   "/api": {
-    target: dev ? "http://test.api.yay.com.cn" : "http://test.api.yay.com.cn",
+    target: dev ? "http://test.api.yay.com.cn" : "http://api.yay.com.cn",
     pathRewrite: { "^/api": "/" },
     changeOrigin: true
   }
