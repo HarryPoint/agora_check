@@ -20,7 +20,8 @@ if (!dev) {
 const proxy = {
   "/api": {
     target: dev ? "http://test.api.yay.com.cn" : "http://api.yay.com.cn",
-    pathRewrite: { "^/api": "/" },
+    // 添加 “/v” 重置掉请求路径
+    pathRewrite: { "^/api/v": "/" },
     changeOrigin: true
   }
 };

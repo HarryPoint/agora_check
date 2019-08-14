@@ -74,7 +74,7 @@ export default () => {
   };
 
   return (
-    <PageLayout>
+    <PageLayout loginModal>
       <div className="pageWrapper">
         <div className="chatWrapper">
           <div className="chatList">

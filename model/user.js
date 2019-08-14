@@ -8,7 +8,7 @@ const model = {
     init: false,
   },
   reducers: {
-    caculate(state, payload) {
+    set(state, payload) {
       const { count } = state;
       const { delta } = payload;
       return { ...state, count: count + delta };
@@ -17,7 +17,7 @@ const model = {
   effects: {
     *init(action, { put }) {
       yield delay(2000);
-      yield put({ type: 'caculate', delta: 1 });
+      yield put({ type: 'set', delta: 1 });
     },
   },
 };

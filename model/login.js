@@ -3,21 +3,18 @@ const delay = timeout => new Promise(resolve => setTimeout(resolve, timeout));
 const model = {
   namespace: 'login',
   state: {
-    name: 'hopperhuang',
-    count: 0,
-    init: false,
+    visible: false
   },
   reducers: {
-    caculate(state, payload) {
-      const { count } = state;
-      const { delta } = payload;
-      return { ...state, count: count + delta };
+    changeVisible(state, payload) {
+      const { visible } = payload;
+      return { ...state, visible};
     },
   },
   effects: {
     *init(action, { put }) {
       yield delay(2000);
-      yield put({ type: 'caculate', delta: 1 });
+      yield put({ type: 'changeVisible', visible: true });
     },
   },
 };

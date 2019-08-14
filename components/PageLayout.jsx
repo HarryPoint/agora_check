@@ -1,7 +1,9 @@
-const PageLayout = ({children}) => {
+import LoginModal from "@/components/LoginModal";
+const PageLayout = ({ children, loginModal }) => {
   return (
     <div className="layout">
       {children}
+      {loginModal && <LoginModal />}
       <style jsx>{`
         .layout {
           background: #fafafa;
@@ -10,4 +12,4 @@ const PageLayout = ({children}) => {
     </div>
   );
 };
-export default PageLayout
+export default PageLayout;
