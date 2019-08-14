@@ -5,6 +5,12 @@
   "repository": "git@git.vm.snqu.com:snqu-network/snto/f2e/anonymous-chat.git",
   "author": "Harry <1751826104@qq.com>",
   "license": "MIT",
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development PORT=3000 node server",
+    "build": "next build",
+    "start": "next start",
+    "prod": "cross-env NODE_ENV=production PORT=3000 node server"
+  },
   "dependencies": {
     "next": "^9.0.3",
     "react": "^16.9.0",

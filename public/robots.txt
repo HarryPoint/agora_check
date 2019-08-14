@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Allow: /ad/*
+Allow: /flow
+Allow: /game
+Allow: /contact
+Allow: /about
+Disallow: /ad
+Disallow: /pageLoading
+Disallow: /testsaga
+
+Sitemap: https://ad.snto.com/sitemap.xml
