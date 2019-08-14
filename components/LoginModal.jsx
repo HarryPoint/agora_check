@@ -60,11 +60,13 @@ const LoginModal = ({ loginState, dispatch }) => {
       params: {
         error: "no"
       }
-    }).then(({ data: { data } }) => {
-      dispatch({ type: "user/set", data });
-    }).catch(err => {
-        dispatch({type: 'login/changeVisible',  visible: true})
-    });
+    })
+      .then(({ data: { data } }) => {
+        dispatch({ type: "user/set", data });
+      })
+      .catch(err => {
+        dispatch({ type: "login/changeVisible", visible: true });
+      });
   }, []);
   // 三方自动登录
   const oAuthLogin = type => {

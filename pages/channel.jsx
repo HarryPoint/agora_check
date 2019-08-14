@@ -10,7 +10,7 @@ const channelId = "test";
 import { useEffect, useState } from "react";
 // 信令实例
 let signal = null;
-export default () => {
+const Page = () => {
   // 当前信令账户id
   let [uid, setUid] = useState("");
   // 当前消息
@@ -74,57 +74,61 @@ export default () => {
   };
 
   return (
-    <PageLayout loginModal>
-      <div className="pageWrapper">
-        <div className="chatWrapper">
-          <div className="chatList">
-            {channelMsgList.map(itm => (
-              <MsgItem key={itm.timestamp} uid={uid} data={itm} />
-            ))}
-          </div>
-          <div className="toolBar">
-            <Row gutter={16}>
-              <Col span={18}>
-                <Input
-                  value={msg}
-                  onChange={ev => setMsg(ev.target.value)}
-                  onPressEnter={broadcastMessage}
-                />
-              </Col>
-              <Col span={6}>
-                <Button type="primary" onClick={broadcastMessage} block>
-                  发送
-                </Button>
-              </Col>
-            </Row>
-          </div>
+    <div className="pageWrapper">
+      <div className="chatWrapper">
+        <div className="chatList">
+          {channelMsgList.map(itm => (
+            <MsgItem key={itm.timestamp} uid={uid} data={itm} />
+          ))}
         </div>
-        <style jsx>{`
-          .pageWrapper {
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-          }
-          .chatWrapper {
-            width: 500px;
-            height: 500px;
-            background: #fafafa;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
-            display: flex;
-            flex-direction: column;
-            padding: 15px;
-          }
-          .chatList {
-            flex-grow: 1;
-            background-color: #fff;
-            overflow-y: auto;
-          }
-          .toolBar {
-            height: 50px;
-          }
-        `}</style>
+        <div className="toolBar">
+          <Row gutter={16}>
+            <Col span={18}>
+              <Input
+                value={msg}
+                onChange={ev => setMsg(ev.target.value)}
+                onPressEnter={broadcastMessage}
+              />
+            </Col>
+            <Col span={6}>
+              <Button type="primary" onClick={broadcastMessage} block>
+                发送
+              </Button>
+            </Col>
+          </Row>
+        </div>
       </div>
-    </PageLayout>
+      <style jsx>{`
+        .pageWrapper {
+          height: 100vh;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+        .chatWrapper {
+          width: 500px;
+          height: 500px;
+          background: #fafafa;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+          display: flex;
+          flex-direction: column;
+          padding: 15px;
+        }
+        .chatList {
+          flex-grow: 1;
+          background-color: #fff;
+          overflow-y: auto;
+        }
+        .toolBar {
+          height: 50px;
+        }
+      `}</style>
+    </div>
   );
 };
+
+export default () => (
+  <PageLayout loginModal>
+    <Page />
+  </PageLayout>
+);
