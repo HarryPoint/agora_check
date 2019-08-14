@@ -1,6 +1,6 @@
 import Link from "next/link";
 import React from "react";
-import { withDva } from "@/utils";
+import { WithDva } from "@/utils";
 
 class Page extends React.Component {
   static async getInitialProps(props) {
@@ -55,6 +55,6 @@ class Page extends React.Component {
   }
 }
 
-export default withDva(state => {
+export default WithDva(state => {
   return { index: state.index };
 })(Page);
