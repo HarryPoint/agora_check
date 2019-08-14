@@ -62,6 +62,8 @@ const LoginModal = ({ loginState, dispatch }) => {
       }
     }).then(({ data: { data } }) => {
       dispatch({ type: "user/set", data });
+    }).catch(err => {
+        dispatch({type: 'login/changeVisible',  visible: true})
     });
   }, []);
   // 三方自动登录
