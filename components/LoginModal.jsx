@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Modal, Form, Input, Checkbox, Button, Message } from "antd";
 import { WithDva, ajax } from "@/utils";
 const LoginForm = ({ form }) => {
@@ -6,9 +7,8 @@ const LoginForm = ({ form }) => {
     e.preventDefault();
     validateFields((err, values) => {
       if (!err) {
-        console.log("Received values of form: ", values);
         ajax({
-          url: "/v/login/mobilePhoneLogin.json",
+          url: "/login/mobilePhoneLogin.json",
           method: "POST",
           params: {
             mobilephone: values.phNum,
@@ -51,7 +51,20 @@ const LoginForm = ({ form }) => {
   );
 };
 const WrappedLoginForm = Form.create()(LoginForm);
-const LoginModal = ({ loginState }) => {
+const LoginModal = ({ loginState, dispatch }) => {
+  useEffect(() => {
+    //  默认请求用户数据
+    ajax({
+      url: "/my.json",
+      method: "get",
+      params: {
+        error: "no"
+      }
+    }).then(({ data: { data } }) => {
+      dispatch({ type: "user/set", data });
+    });
+  }, []);
+  // 三方自动登录
   const oAuthLogin = type => {
     const thirdLogin = ({ type, keep_login }) => {
       window.open(
@@ -80,7 +93,7 @@ const LoginModal = ({ loginState }) => {
     });
   };
   return (
-    <Modal visible={true} footer={null}>
+    <Modal visible={loginState.visible} footer={null}>
       <div className="formWrapper">
         <WrappedLoginForm />
       </div>

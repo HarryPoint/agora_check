@@ -9,9 +9,8 @@ const model = {
   },
   reducers: {
     set(state, payload) {
-      const { count } = state;
-      const { delta } = payload;
-      return { ...state, count: count + delta };
+      const { data } = payload;
+      return { ...state, ...data, init: true };
     },
   },
   effects: {
