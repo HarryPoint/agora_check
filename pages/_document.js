@@ -10,7 +10,6 @@ export default class MyDocument extends Document {
     return (
       <html>
         <Head>
-          <style>{`body { margin: 0 } /* custom! */`}</style>
           <script src="/static/AgoraSig-1.4.0.js"></script>
         </Head>
         <body className="custom_class">
