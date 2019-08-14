@@ -10,6 +10,8 @@ import { useEffect, useState } from "react";
 // 信令实例
 let signal = null;
 export default () => {
+  // 当前信令账户id
+  let [uid, setUid] = useState('');
   // 当前消息
   let [msg, setMsg] = useState("");
   //   p2p消息
@@ -24,6 +26,7 @@ export default () => {
         .login(`test${Math.random()}`)
         .then(res => {
           console.log("signal-success", res);
+          setUid(res)
           // 初始化频道
           signal
             .join(channelId)
@@ -33,6 +36,7 @@ export default () => {
               signal.channelEmitter.on(
                 "onMessageChannelReceive",
                 (account, uid, msg) => {
+                  console.log(account, uid, msg)
                   setChannelMsgList(list =>
                     list.concat({
                       account,
@@ -73,13 +77,13 @@ export default () => {
       <div className="chatWrapper">
         <div className="chatList">
           {channelMsgList.map(itm => (
-            <MsgItem key={itm.timestamp} data={itm} />
+            <MsgItem key={itm.timestamp} uid={uid} data={itm} />
           ))}
         </div>
         <div className="toolBar">
           <Row gutter={16}>
             <Col span={18}>
-              <Input value={msg} onChange={ev => setMsg(ev.target.value)} />
+              <Input value={msg} onChange={ev => setMsg(ev.target.value)} onPressEnter={broadcastMessage} />
             </Col>
             <Col span={6}>
               <Button type="primary" onClick={broadcastMessage} block>
@@ -108,6 +112,7 @@ export default () => {
         .chatList {
           flex-grow: 1;
           background-color: #fff;
+          overflow-y: auto;
         }
         .toolBar {
           height: 50px;
