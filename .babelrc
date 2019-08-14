@@ -1,0 +1,22 @@
+{
+    "presets": [
+        "next/babel"
+    ],
+    "plugins": [
+        [
+            "import",
+            {
+                "libraryName": "antd",
+                "style": false
+            }
+        ],
+        [
+            "module-resolver",
+            {
+                "alias": {
+                    "dva": "dva-no-router"
+                }
+            }
+        ]
+    ]
+}
