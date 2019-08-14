@@ -6,7 +6,7 @@ const deploy = {
 module.exports = {
   apps: [
     {
-      name: 'ad.snto.com',
+      name: 'nm.yuema.cn',
       instances: 2,
       script: 'server/index.js',
       // 正式服
