@@ -1,6 +1,7 @@
 import React from "react";
 import App, { Container } from "next/app";
 import { ConfigProvider } from "antd";
+import { WithDva } from "@/utils";
 import zh_CN from "antd/lib/locale-provider/zh_CN";
 // 全量引入样式，防止样式怪异
 import "antd/dist/antd.less";

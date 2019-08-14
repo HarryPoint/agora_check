@@ -46,8 +46,8 @@ class Page extends React.Component {
           </button>
         </p>
         <p>
-          <Link href="/users">
-            <a>Go to /users</a>
+          <Link href="/channel">
+            <a>Go to /channel</a>
           </Link>
         </p>
       </div>
