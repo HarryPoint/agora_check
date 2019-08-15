@@ -16,7 +16,7 @@ module.exports = {
         PORT,
       },
       // 测试服
-      env_test: {
+      env_development: {
         NODE_ENV: 'production',
         HOST,
         PORT,
