@@ -3,7 +3,7 @@ const isPro = false;
 const model = {
   namespace: "base",
   state: {
-    // 插件id
+    // 防水墙验证码id
     tencentCaptchaAppId: "2020294435",
     // 是否是正式服
     isPro,

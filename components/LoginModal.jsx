@@ -1,8 +1,87 @@
-import { useEffect } from "react";
-import { Modal, Form, Input, Checkbox, Button, Message, Row, Col } from "antd";
+import { useEffect, useState, useRef } from "react";
+import { Modal, Form, Input, Checkbox, Button, Message } from "antd";
 import { WithDva, ajax } from "@/utils";
-const LoginForm = ({ form }) => {
-  const { getFieldDecorator, validateFields } = form;
+const LoginForm = props => {
+  let { form, base } = props;
+  const { getFieldDecorator, getFieldValue, validateFields } = form;
+  const ref = useRef();
+  let [tcIns, setTcIns] = useState(null);
+  // 默认倒计时 时长
+  let [initCountDown] = useState(60);
+  // 验证码倒计时
+  let [countDown, setCountDown] = useState(initCountDown);
+  // 获取验证码是否可点击
+  let [verDisable, setVerDisable] = useState(false);
+  let [verCodeData, setVerCodeData] = useState(null);
+  // api请求验证码
+  const fetchVerCode = (phNum, action, { ret, randstr, ticket }) => {
+    console.log("test", ret, randstr, ticket);
+    setVerCodeData({
+      ret,
+      randstr,
+      ticket
+    });
+  };
+  useEffect(() => {
+    if (!tcIns) {
+      setTcIns(
+        new TencentCaptcha(
+          // eslint-disable-next-line no-undef
+          base.tencentCaptchaAppId,
+          (...arg) => {
+            fetchVerCode(getFieldValue("phNum"), "login", ...arg);
+          },
+          {}
+        )
+      );
+    }
+  }, []);
+  // 验证码信息改变，触发获取验证码操作
+  useEffect(() => {
+    if (verCodeData) {
+      let { ret, randstr, ticket } = verCodeData;
+      if (ret === 0) {
+        // Message.success('验证成功！');
+        ajax({
+          url: "/captcha.json",
+          method: "POST",
+          params: {
+            mobilephone: getFieldValue("phNum"),
+            action: "login",
+            ticket,
+            rand_str: randstr
+          }
+        }).then(({ data: { status, msg } }) => {
+          if (status === 0) {
+            Message.success(msg);
+            setVerDisable(true);
+            clearInterval(ref.current);
+            // 开始倒计时
+            ref.current = setInterval(() => {
+              setCountDown(prev => {
+                if (prev === 1) {
+                  clearInterval(ref.current);
+                  setVerDisable(false);
+                  return initCountDown;
+                }
+                return --prev;
+              });
+            }, 1000);
+          } else {
+            Message.error(msg);
+          }
+        });
+      } else if (ret === 2) {
+        // 用户主动关闭验证码
+      } else {
+        Message.error("图形验证码未知错误！");
+      }
+    }
+    return () => {
+      clearInterval(ref.current);
+    };
+  }, [verCodeData]);
+
   const handleSubmit = e => {
     e.preventDefault();
     validateFields((err, values) => {
@@ -25,6 +104,15 @@ const LoginForm = ({ form }) => {
       }
     });
   };
+  // 点击获取验证码
+  const handleGetVarCode = () => {
+    validateFields(["phNum"], (errors, values) => {
+      if (!errors) {
+        tcIns.show();
+      }
+    });
+  };
+
   return (
     <Form onSubmit={handleSubmit}>
       <Form.Item>
@@ -39,7 +127,11 @@ const LoginForm = ({ form }) => {
           <Input
             size="large"
             placeholder="动态密码"
-            suffix={<span style={{ cursor: "pointer" }}>获取动态密码</span>}
+            suffix={
+              <span style={{ cursor: "pointer" }} onClick={handleGetVarCode}>
+                {verDisable ? `${countDown}s` : "获取动态密码"}
+              </span>
+            }
           />
         )}
       </Form.Item>
@@ -63,7 +155,8 @@ const LoginForm = ({ form }) => {
   );
 };
 const WrappedLoginForm = Form.create()(LoginForm);
-const LoginModal = ({ loginState, dispatch }) => {
+const LoginModal = props => {
+  let { loginState, dispatch } = props;
   useEffect(() => {
     //  默认请求用户数据
     ajax({
@@ -109,13 +202,22 @@ const LoginModal = ({ loginState, dispatch }) => {
     });
   };
   return (
-    <Modal wrapClassName="loginModal" visible={loginState.visible} width={760} footer={null}>
-      <img className="header" src={require("@/assets/images/login_header.png")} alt="" />
+    <Modal
+      wrapClassName="loginModal"
+      visible={loginState.visible}
+      width={760}
+      footer={null}
+    >
+      <img
+        className="header"
+        src={require("@/assets/images/login_header.png")}
+        alt=""
+      />
       <div className="contentWrapper">
         <div className="shadow" />
         <div className="formWrapper">
           <h5>手机登录</h5>
-          <WrappedLoginForm />
+          <WrappedLoginForm {...props} />
         </div>
         <div className="autoWrapper">
           <h5>手机登录</h5>
@@ -220,6 +322,7 @@ const LoginModal = ({ loginState, dispatch }) => {
 export default WithDva(state => {
   return {
     loginState: state.login,
-    userState: state.user
+    userState: state.user,
+    base: state.base
   };
 })(LoginModal);
