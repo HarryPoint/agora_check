@@ -1,5 +1,5 @@
 import React, { PureComponent, createRef } from "react";
-import { Radio, Button, Carousel, Icon } from "antd";
+import { Radio, Button, Carousel, Icon, Input } from "antd";
 import { WithDva, ajax, lodash } from "@/utils";
 import PageLayout from "@/components/PageLayout";
 
@@ -230,7 +230,13 @@ class Step2 extends PureComponent {
                 <Button type="primary" size="large" shape="round">
                   再等一次
                 </Button>
-                <Button type="primary" size="large" ghost shape="round" style={{marginLeft: 28}}>
+                <Button
+                  type="primary"
+                  size="large"
+                  ghost
+                  shape="round"
+                  style={{ marginLeft: 28 }}
+                >
                   离开
                 </Button>
               </div>
@@ -265,17 +271,148 @@ class Step2 extends PureComponent {
 class Step3 extends PureComponent {
   render() {
     return (
-      <div className="step1">
+      <div className="step3">
         <div className="wrapper">
-          <div className="pannel" />
+          <div className="pannel">
+            <div className="header">
+              <div className="userInfo">
+                <span>女生 四川</span>
+                <i>声优聊天</i>
+                <i>钻石王者</i>
+              </div>
+              <div className="headerAction">
+                <span style={{ backgroundColor: "#b5bdd0" }}>举报</span>
+                <span style={{ backgroundColor: "#ff4362" }}>换一个</span>
+                <span style={{ backgroundColor: "#ffba43" }}>我的账户</span>
+              </div>
+            </div>
+            <div className="body" />
+            <div className="footer">
+              <div className="toolbar">
+                <span>
+                  <Icon type="smile" />
+                </span>
+                <span>
+                  {" "}
+                  <Icon type="picture" />
+                </span>
+                <span>
+                  <Icon type="gift" />
+                </span>
+                <span>
+                  <Icon type="red-envelope" />
+                </span>
+              </div>
+              <div className="textArea">
+                <Input.TextArea
+                  autosize={{ minRows: 4, maxRows: 4 }}
+                  placeholder="请输入..."
+                />
+              </div>
+              <div className="footerAction">
+                <Button type="primary" size="large" shape="round" ghost>
+                  打个招呼
+                </Button>
+                <Button
+                  type="primary"
+                  size="large"
+                  shape="round"
+                  style={{ marginLeft: 12 }}
+                >
+                  发送
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
+        <style jsx>{`
+          .step3 {
+            padding: 24px 0;
+          }
+          .pannel {
+            background: #fff;
+            background-position: center top;
+            background-size: 100% auto;
+            height: 744px;
+            box-sizing: border-box;
+            padding: 0 30px;
+            padding-top: 1px;
+          }
+          .header {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 26px;
+          }
+          .header .userInfo {
+            display: flex;
+            align-items: center;
+          }
+          .header .userInfo span {
+            font-family: PingFangSC-Regular;
+            font-size: 24px;
+            font-weight: normal;
+            font-stretch: normal;
+            line-height: 46px;
+            letter-spacing: 0px;
+            color: #575757;
+            display: inline-block;
+            margin-right: 0.5em;
+          }
+          .header .userInfo i {
+            display: inline-block;
+            margin-right: 10px;
+            background-color: #ff4362;
+            border-radius: 2px;
+            color: #fff;
+            font-family: PingFangSC-Regular;
+            font-size: 12px;
+            font-weight: normal;
+            font-stretch: normal;
+            line-height: 20px;
+            letter-spacing: 0px;
+            color: #ffffff;
+            font-style: normal;
+            padding: 0 0.5em;
+            border-radius: 2px;
+          }
+          .header .headerAction {
+            transform: translateY(10px);
+          }
+          .header .headerAction span {
+            display: inline-block;
+            color: #fff;
+            line-height: 30px;
+            border-radius: 8px;
+            margin-left: 10px;
+            padding: 0 1em;
+            cursor: pointer;
+          }
+          .body {
+            background: #fafafa;
+            border: solid 1px #dcdcdc;
+            border-left: none;
+            border-right: none;
+            height: 460px;
+          }
+          .footer .toolbar span {
+            font-size: 26px;
+            display: inline-block;
+            margin-right: 10px;
+            cursor: pointer;
+          }
+          .footer .footerAction {
+            text-align: right;
+            padding-bottom: 40px;
+            padding-top: 10px;
+          }
+        `}</style>
       </div>
     );
   }
 }
 class Page extends React.Component {
   state = {
-    step: 2
+    step: 3
   };
   render() {
     let { step } = this.state;
