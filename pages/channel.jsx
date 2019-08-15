@@ -1,16 +1,14 @@
-import { SignalingClient, createChannelMsg } from "@/utils";
+import { useEffect, useState } from "react";
+import { WithDva, SignalingClient, createChannelMsg } from "@/utils";
 import { Button, Row, Col, Input, message } from "antd";
 import PageLayout from "@/components/PageLayout";
-import MsgItem from "@/components/MsgItem";
-const isPro = false;
-const APP_ID = isPro
-  ? "1f97626a3167462589c9d4e0acd63925"
-  : "58fffcf1703c435a9a4545192c76f1fd";
+import MsgList from "@/components/MsgList";
+
 const channelId = "test";
-import { useEffect, useState } from "react";
 // 信令实例
 let signal = null;
-const Page = () => {
+const Page = (props) => {
+  let {base, login, user} = props
   // 当前信令账户id
   let [uid, setUid] = useState("");
   // 当前消息
@@ -22,7 +20,7 @@ const Page = () => {
   useEffect(() => {
     // 初始化信令
     if (!signal) {
-      signal = new SignalingClient(APP_ID, "");
+      signal = new SignalingClient(base.agoraId, "");
       signal
         .login(`test${Math.random()}`)
         .then(res => {
@@ -74,61 +72,51 @@ const Page = () => {
   };
 
   return (
-    <div className="pageWrapper">
-      <div className="chatWrapper">
-        <div className="chatList">
-          {channelMsgList.map(itm => (
-            <MsgItem key={itm.timestamp} uid={uid} data={itm} />
-          ))}
+    
+      <div className="pageWrapper">
+        <div className="chatWrapper">
+          <MsgList uid={uid} msgList={channelMsgList} />
+          <div className="toolBar">
+            <Row gutter={16}>
+              <Col span={18}>
+                <Input
+                  value={msg}
+                  onChange={ev => setMsg(ev.target.value)}
+                  onPressEnter={broadcastMessage}
+                />
+              </Col>
+              <Col span={6}>
+                <Button type="primary" onClick={broadcastMessage} block>
+                  发送
+                </Button>
+              </Col>
+            </Row>
+          </div>
         </div>
-        <div className="toolBar">
-          <Row gutter={16}>
-            <Col span={18}>
-              <Input
-                value={msg}
-                onChange={ev => setMsg(ev.target.value)}
-                onPressEnter={broadcastMessage}
-              />
-            </Col>
-            <Col span={6}>
-              <Button type="primary" onClick={broadcastMessage} block>
-                发送
-              </Button>
-            </Col>
-          </Row>
-        </div>
+        <style jsx>{`
+          .pageWrapper {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+          .chatWrapper {
+            width: 500px;
+            background: #fafafa;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+            padding: 15px;
+          }
+          .toolBar {
+            height: 50px;
+          }
+        `}</style>
       </div>
-      <style jsx>{`
-        .pageWrapper {
-          height: 100vh;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
-        .chatWrapper {
-          width: 500px;
-          height: 500px;
-          background: #fafafa;
-          box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
-          display: flex;
-          flex-direction: column;
-          padding: 15px;
-        }
-        .chatList {
-          flex-grow: 1;
-          background-color: #fff;
-          overflow-y: auto;
-        }
-        .toolBar {
-          height: 50px;
-        }
-      `}</style>
-    </div>
   );
 };
 
-export default () => (
-  <PageLayout loginModal>
-    <Page />
-  </PageLayout>
-);
+
+const DvaPage = WithDva(state => {
+  return { base: state.base, user: state.user, login: state.login };
+})(Page);
+
+export default () => <PageLayout loginModal><DvaPage/></PageLayout>;
