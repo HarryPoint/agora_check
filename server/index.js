@@ -5,21 +5,22 @@ const next = require("next");
 const sitemap = require("./sitemap");
 
 const port = parseInt(process.env.PORT, 10) || 3000;
-const env = process.env.NODE_ENV;
-const dev = env !== "production";
+const isTest = process.env.TEST === 'true';
+const env = process.env.NODE_ENV
+const isPro =  env === "production";
 const app = next({
   dir: ".", // base directory where everything is, could move to src later
-  dev
+  dev: !isPro
 });
 
-if (!dev) {
+if (isPro && !isTest) {
   // 设置cdn
   //   app.setAssetPrefix("http://cdn.com/myapp");
 }
 
 const proxy = {
   "/api": {
-    target: dev ? "http://test.api.yay.com.cn" : "http://api.yay.com.cn",
+    target: isTest ? "http://test.api.yay.com.cn" : "http://api.yay.com.cn",
     // 添加 “/v” 重置掉请求路径
     pathRewrite: { "^/api/v": "/" },
     changeOrigin: true
