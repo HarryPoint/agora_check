@@ -10,8 +10,10 @@ class Client extends PureComponent {
   state = {
     // 当前信令账户id
     uid: "",
+    // 等候大厅id
+    waitingChannelId: 'lobby',
     // 频道id 默认为等候大厅
-    channelId: "test",
+    channelId: "",
     //   p2p消息
     msgList: [],
     //   channel消息
@@ -20,7 +22,7 @@ class Client extends PureComponent {
 
   initSignal = () => {
     let { user, base } = this.props;
-    let { channelId } = this.state;
+    let { waitingChannelId } = this.state;
     console.log("hahah");
     if (!this.signal && user._id) {
       this.signal = new SignalingClient(base.agoraId, "");
@@ -33,7 +35,7 @@ class Client extends PureComponent {
           });
           // 初始化频道
           this.signal
-            .join(channelId)
+            .join(waitingChannelId)
             .then(res => {
               console.log("channel-success", res);
               // 收到频道消息
