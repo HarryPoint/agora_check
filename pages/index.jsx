@@ -216,10 +216,48 @@ class Step1 extends PureComponent {
 class Step2 extends PureComponent {
   render() {
     return (
-      <div className="step1">
+      <div className="step2">
         <div className="wrapper">
-          <div className="pannel" />
+          <div
+            className="pannel"
+            style={{
+              backgroundImage: `url(${require("@/assets/images/step2_bg.png")})`
+            }}
+          >
+            <div className="content">
+              <img src={require("@/assets/images/res_fail.png")} alt="" />
+              <div className="btnWrapper">
+                <Button type="primary" size="large" shape="round">
+                  再等一次
+                </Button>
+                <Button type="primary" size="large" ghost shape="round" style={{marginLeft: 28}}>
+                  离开
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
+        <style jsx>{`
+          .step2 {
+            padding: 24px 0;
+          }
+          .pannel {
+            background: #fff;
+            background-position: center top;
+            background-size: 100% auto;
+            height: 744px;
+            padding-top: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          .content {
+            text-align: center;
+          }
+          .content img {
+            transform: translate(-20px, -30px);
+          }
+        `}</style>
       </div>
     );
   }
@@ -237,7 +275,7 @@ class Step3 extends PureComponent {
 }
 class Page extends React.Component {
   state = {
-    step: 1
+    step: 2
   };
   render() {
     let { step } = this.state;
