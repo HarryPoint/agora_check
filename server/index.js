@@ -5,9 +5,9 @@ const next = require("next");
 const sitemap = require("./sitemap");
 
 const port = parseInt(process.env.PORT, 10) || 3000;
-const isTest = process.env.TEST === 'true';
-const env = process.env.NODE_ENV
-const isPro =  env === "production";
+const isTest = process.env.TEST === "true";
+const env = process.env.NODE_ENV;
+const isPro = env === "production";
 const app = next({
   dir: ".", // base directory where everything is, could move to src later
   dev: !isPro
@@ -21,8 +21,8 @@ if (isPro && !isTest) {
 const proxy = {
   "/api": {
     target: isTest ? "http://test.api.yay.com.cn" : "http://api.yay.com.cn",
-    // 添加 “/v” 重置掉请求路径
-    pathRewrite: { "^/api/v": "/" },
+    // 添加 “/_” 重置掉请求路径
+    pathRewrite: { "^/api/_": "/" },
     changeOrigin: true
   }
 };

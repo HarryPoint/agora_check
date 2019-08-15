@@ -4,6 +4,7 @@ import "moment/locale/zh-cn";
 export { default as WithDva } from "./withDva";
 export { default as SignalingClient } from "./signalingClient";
 import { Message } from "antd";
+export { default as lodash } from "lodash";
 
 orgMoment.locale("zh-cn");
 export const moment = orgMoment;
