@@ -11,6 +11,8 @@ export default class MyDocument extends Document {
       <html>
         <Head>
           <script src="/static/AgoraSig-1.4.0.js"></script>
+          {/* 验证码插件 */}
+          <script src="https://ssl.captcha.qq.com/TCaptcha.js"></script>
         </Head>
         <body className="custom_class">
           <Main />
