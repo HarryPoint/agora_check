@@ -11,7 +11,7 @@ class Client extends PureComponent {
     // 当前信令账户id
     uid: "",
     // 等候大厅id
-    waitingChannelId: 'lobby',
+    waitingChannelId: "lobby",
     // 频道id 默认为等候大厅
     channelId: "",
     //   p2p消息
@@ -19,6 +19,19 @@ class Client extends PureComponent {
     //   channel消息
     channelMsgList: []
   };
+
+  invoke(func, args, cb) {
+    let session = this.signal.session;
+    session &&
+      session.invoke(func, args, function(err, val) {
+        if (err) {
+          console.log(err);
+          console.error(val.reason);
+        } else {
+          cb && cb(err, val);
+        }
+      });
+  }
 
   initSignal = () => {
     let { user, base } = this.props;
@@ -60,6 +73,13 @@ class Client extends PureComponent {
                   console.log("onChannelUserJoined", account, uid);
                 }
               );
+              // 获取频道内用户列表回调
+              this.signal.channelEmitter.on("onChannelUserList", users => {
+                console.log("onChannelUserList", users);
+              });
+              this.invoke('io.agora.signal.channel_query_userlist', {name: waitingChannelId}, (...arg) => {
+                console.log('invoke', ...arg)
+              })
             })
             .catch(err => {
               console.log("channel-fail", err);
