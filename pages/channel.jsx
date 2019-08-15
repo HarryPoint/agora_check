@@ -3,8 +3,8 @@ import { WithDva, SignalingClient, createChannelMsg } from "@/utils";
 import { Button, Row, Col, Input, message } from "antd";
 import PageLayout from "@/components/PageLayout";
 import MsgList from "@/components/MsgList";
-
-const channelId = "test";
+// 等候大厅
+const channelId = "lobby";
 // 信令实例
 let signal = null;
 const Page = (props) => {
@@ -17,6 +17,10 @@ const Page = (props) => {
   let [msgList, setMsgList] = useState([]);
   //   channel消息
   let [channelMsgList, setChannelMsgList] = useState([]);
+  //  正在匹配状态
+  let [matching, setMatching ] = useState(false);
+  //  匹配是否成功
+  let [matched, setMatched] = useState(false);
   useEffect(() => {
     // 初始化信令
     if (!signal) {
@@ -47,8 +51,8 @@ const Page = (props) => {
                 }
               );
               // 加入频道消息
-              signal.channelEmitter.on("onChannelUserJoined", () => {
-                console.log("onChannelUserJoined");
+              signal.channelEmitter.on("onChannelUserJoined", (account, uid) => {
+                console.log("onChannelUserJoined", account, uid);
               });
             })
             .catch(err => {
@@ -72,7 +76,6 @@ const Page = (props) => {
   };
 
   return (
-    
       <div className="pageWrapper">
         <div className="chatWrapper">
           <MsgList uid={uid} msgList={channelMsgList} />
