@@ -6,7 +6,9 @@ import MsgList from "@/components/MsgList";
 
 class Client extends PureComponent {
   // 信令实例
-  signal = null;
+  client = null;
+  // 信令日志
+  debug = true;
   state = {
     // 当前信令账户id
     uid: "",
@@ -20,8 +22,8 @@ class Client extends PureComponent {
     channelMsgList: []
   };
 
-  invoke(func, args, cb) {
-    let session = this.signal.session;
+  invoke = (func, args, cb) => {
+    let session = this.client.session;
     session &&
       session.invoke(func, args, function(err, val) {
         if (err) {
@@ -31,28 +33,40 @@ class Client extends PureComponent {
           cb && cb(err, val);
         }
       });
-  }
+  };
 
-  initSignal = () => {
+  initclient = () => {
     let { user, base } = this.props;
     let { waitingChannelId } = this.state;
     console.log("hahah");
-    if (!this.signal && user._id) {
-      this.signal = new SignalingClient(base.agoraId, "");
-      this.signal
+    if (!this.client && user._id) {
+      this.client = new SignalingClient(base.agoraId, "");
+      this.client.signal.setDoLog(this.debug);
+      this.client
         .login(user._id)
         .then(res => {
-          console.log("signal-success", res);
+          console.log("client-success", res);
+          console.log("account", user._id);
           this.setState({
             uid: res
           });
+          // 接收到邀请加入匹配
+          this.client.sessionEmitter.on("onInviteReceived", call => {
+            console.log("call", call);
+          });
+          this.client.sessionEmitter.on("onInviteAcceptedByPeer ", call => {
+            console.log("onInviteAcceptedByPeer ", call);
+          });
+          this.client.sessionEmitter.on("onInviteRefusedByPeer", call => {
+            console.log("onInviteRefusedByPeer", call);
+          });
           // 初始化频道
-          this.signal
+          this.client
             .join(waitingChannelId)
             .then(res => {
               console.log("channel-success", res);
               // 收到频道消息
-              this.signal.channelEmitter.on(
+              this.client.channelEmitter.on(
                 "onMessageChannelReceive",
                 (account, uid, msg) => {
                   console.log(account, uid, msg);
@@ -67,26 +81,44 @@ class Client extends PureComponent {
                 }
               );
               // 加入频道消息
-              this.signal.channelEmitter.on(
+              this.client.channelEmitter.on(
                 "onChannelUserJoined",
                 (account, uid) => {
                   console.log("onChannelUserJoined", account, uid);
                 }
               );
               // 获取频道内用户列表回调
-              this.signal.channelEmitter.on("onChannelUserList", users => {
-                console.log("onChannelUserList", users);
-              });
-              this.invoke('io.agora.signal.channel_query_userlist', {name: waitingChannelId}, (...arg) => {
-                console.log('invoke', ...arg)
-              })
+              // this.client.channelEmitter.on("onChannelUserList", users => {
+              //   console.log("onChannelUserList", users);
+              // });
+              // 获取频道内用户列表
+              this.invoke(
+                "io.agora.signal.channel_query_userlist",
+                { name: waitingChannelId },
+                (err, arg) => {
+                  let { result, num, list } = arg;
+                  if (num >= 2) {
+                    let otherList = list.filter(
+                      itm => itm[1] !== this.state.uid
+                    );
+                    let target = otherList.shift();
+                    console.log("target", target);
+                    this.client.session.channelInviteUser2(
+                      `${user._id}__${target[0]}`,
+                      target[0],
+                      { _require_peer_online: 1 }
+                    );
+                    console.log(otherList);
+                  }
+                }
+              );
             })
             .catch(err => {
               console.log("channel-fail", err);
             });
         })
         .catch(err => {
-          console.log("signal-fail", err);
+          console.log("client-fail", err);
         });
     } else {
       Message.error("请先登录");
@@ -96,7 +128,7 @@ class Client extends PureComponent {
   broadcastMessage = () => {
     let { msg } = this.state;
     if (msg) {
-      this.signal.broadcastMessage(createChannelMsg("msg", { txt: msg }));
+      this.client.broadcastMessage(createChannelMsg("msg", { txt: msg }));
       this.setState({
         msg: ""
       });
@@ -105,7 +137,7 @@ class Client extends PureComponent {
     }
   };
   componentDidMount() {
-    this.initSignal();
+    this.initclient();
   }
   render() {
     let { base, login, user } = this.props;
