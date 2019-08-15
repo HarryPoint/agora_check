@@ -8,7 +8,7 @@ class Client extends PureComponent {
   // 信令实例
   client = null;
   // 信令日志
-  debug = true;
+  debug = false;
   state = {
     // 当前信令账户id
     uid: "",
@@ -38,7 +38,6 @@ class Client extends PureComponent {
   initclient = () => {
     let { user, base } = this.props;
     let { waitingChannelId } = this.state;
-    console.log("hahah");
     if (!this.client && user._id) {
       this.client = new SignalingClient(base.agoraId, "");
       this.client.signal.setDoLog(this.debug);
@@ -51,15 +50,16 @@ class Client extends PureComponent {
             uid: res
           });
           // 接收到邀请加入匹配
-          this.client.sessionEmitter.on("onInviteReceived", call => {
-            console.log("call", call);
+          this.client.sessionEmitter.on("onInviteReceived", callIns => {
+            console.log("call", callIns);
+            callIns.channelInviteAccept();
           });
-          this.client.sessionEmitter.on("onInviteAcceptedByPeer ", call => {
-            console.log("onInviteAcceptedByPeer ", call);
-          });
-          this.client.sessionEmitter.on("onInviteRefusedByPeer", call => {
-            console.log("onInviteRefusedByPeer", call);
-          });
+          this.client.sessionEmitter.on(
+            "onMessageInstantReceive",
+            (account, uid, msg) => {
+              console.log("onMessageInstantReceive", account, uid, msg);
+            }
+          );
           // 初始化频道
           this.client
             .join(waitingChannelId)
@@ -85,33 +85,57 @@ class Client extends PureComponent {
                 "onChannelUserJoined",
                 (account, uid) => {
                   console.log("onChannelUserJoined", account, uid);
+                  if(account === user._id) return;
+                  // 发起邀请
+                  let callIns = this.client.session.channelInviteUser2(
+                    `${user._id}__${account}`,
+                    account,
+                    { _require_peer_online: 1 }
+                  );
+                  callIns.onInviteReceivedByPeer = extra => {
+                    console.log("onInviteReceivedByPeer", extra);
+                  };
+                  callIns.onInviteAcceptedByPeer = () => {
+                    console.log("onInviteAcceptedByPeer");
+                  };
+                  callIns.onInviteRefusedByPeer = () => {
+                    console.log("onInviteRefusedByPeer");
+                  };
+                  callIns.onInviteFailed = () => {
+                    console.log("onInviteFailed");
+                  };
+                  callIns.onInviteEndByPeer = () => {
+                    console.log("onInviteEndByPeer");
+                  };
+                  callIns.onInviteEndByMyself = () => {
+                    console.log("onInviteEndByMyself");
+                  };
+                  callIns.onInviteMsg = () => {
+                    console.log("onInviteMsg");
+                  };
+                  console.log(callIns);
                 }
               );
-              // 获取频道内用户列表回调
-              // this.client.channelEmitter.on("onChannelUserList", users => {
-              //   console.log("onChannelUserList", users);
-              // });
               // 获取频道内用户列表
-              this.invoke(
-                "io.agora.signal.channel_query_userlist",
-                { name: waitingChannelId },
-                (err, arg) => {
-                  let { result, num, list } = arg;
-                  if (num >= 2) {
-                    let otherList = list.filter(
-                      itm => itm[1] !== this.state.uid
-                    );
-                    let target = otherList.shift();
-                    console.log("target", target);
-                    this.client.session.channelInviteUser2(
-                      `${user._id}__${target[0]}`,
-                      target[0],
-                      { _require_peer_online: 1 }
-                    );
-                    console.log(otherList);
-                  }
-                }
-              );
+              // this.invoke(
+              //   "io.agora.signal.channel_query_userlist",
+              //   { name: waitingChannelId },
+              //   (err, arg) => {
+              //     let { result, num, list } = arg;
+              //     if (num >= 2 && list[0][0] === user._id) {
+              //       console.log('list', list, user._id)
+              //       let otherList = list.filter(
+              //         itm => itm[1] !== this.state.uid
+              //       );
+              //       let target = otherList.shift();
+              //       console.log("target", list, target, this.client.signal);
+              //       // 发送私聊消息
+              //       // this.client.sendMessage('27e9c983507e9349', "sdfsfsfsf");
+              //       // 离开匹配大厅
+                    
+              //     }
+              //   }
+              // );
             })
             .catch(err => {
               console.log("channel-fail", err);
