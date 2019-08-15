@@ -89,7 +89,7 @@ const LoginForm = props => {
         ajax({
           url: "/login/mobilePhoneLogin.json",
           method: "POST",
-          params: {
+          data: {
             mobilephone: values.phNum,
             captcha: values.verCode,
             keep_login: values.keepLogin ? 1 : 0
@@ -167,10 +167,10 @@ const LoginModal = props => {
       }
     })
       .then(({ data: { data } }) => {
-        dispatch({ type: "user/set", data });
+        dispatch({ type: "user/set", payload: data });
       })
       .catch(err => {
-        dispatch({ type: "login/changeVisible", visible: true });
+        dispatch({ type: "login/changeVisible", payload: {visible: true} });
       });
   }, []);
   // 三方自动登录

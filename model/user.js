@@ -8,9 +8,8 @@ const model = {
     init: false,
   },
   reducers: {
-    set(state, payload) {
-      const { data } = payload;
-      return { ...state, ...data, init: true };
+    set(state, {payload}) {
+      return { ...state, ...payload, init: true };
     },
   },
   effects: {
