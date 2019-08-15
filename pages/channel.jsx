@@ -1,59 +1,63 @@
-import { useEffect, useState } from "react";
+import { PureComponent } from "react";
 import { WithDva, SignalingClient, createChannelMsg } from "@/utils";
-import { Button, Row, Col, Input, message } from "antd";
+import { Button, Row, Col, Input, Message } from "antd";
 import PageLayout from "@/components/PageLayout";
 import MsgList from "@/components/MsgList";
-// 等候大厅
-const channelId = "lobby";
-// 信令实例
-let signal = null;
-const Page = (props) => {
-  let {base, login, user} = props
-  // 当前信令账户id
-  let [uid, setUid] = useState("");
-  // 当前消息
-  let [msg, setMsg] = useState("");
-  //   p2p消息
-  let [msgList, setMsgList] = useState([]);
-  //   channel消息
-  let [channelMsgList, setChannelMsgList] = useState([]);
-  //  正在匹配状态
-  let [matching, setMatching ] = useState(false);
-  //  匹配是否成功
-  let [matched, setMatched] = useState(false);
-  useEffect(() => {
-    // 初始化信令
-    if (!signal) {
-      signal = new SignalingClient(base.agoraId, "");
-      signal
-        .login(`test${Math.random()}`)
+
+class Client extends PureComponent {
+  // 信令实例
+  signal = null;
+  state = {
+    // 当前信令账户id
+    uid: "",
+    // 频道id 默认为等候大厅
+    channelId: "test",
+    //   p2p消息
+    msgList: [],
+    //   channel消息
+    channelMsgList: []
+  };
+
+  initSignal = () => {
+    let { user, base } = this.props;
+    let { channelId } = this.state;
+    console.log("hahah");
+    if (!this.signal && user._id) {
+      this.signal = new SignalingClient(base.agoraId, "");
+      this.signal
+        .login(user._id)
         .then(res => {
           console.log("signal-success", res);
-          setUid(res);
+          this.setState({
+            uid: res
+          });
           // 初始化频道
-          signal
+          this.signal
             .join(channelId)
             .then(res => {
               console.log("channel-success", res);
               // 收到频道消息
-              signal.channelEmitter.on(
+              this.signal.channelEmitter.on(
                 "onMessageChannelReceive",
                 (account, uid, msg) => {
                   console.log(account, uid, msg);
-                  setChannelMsgList(list =>
-                    list.concat({
+                  this.setState(({ channelMsgList }) => ({
+                    channelMsgList: channelMsgList.concat({
                       account,
                       uid,
                       msg,
                       timestamp: new Date().getTime()
                     })
-                  );
+                  }));
                 }
               );
               // 加入频道消息
-              signal.channelEmitter.on("onChannelUserJoined", (account, uid) => {
-                console.log("onChannelUserJoined", account, uid);
-              });
+              this.signal.channelEmitter.on(
+                "onChannelUserJoined",
+                (account, uid) => {
+                  console.log("onChannelUserJoined", account, uid);
+                }
+              );
             })
             .catch(err => {
               console.log("channel-fail", err);
@@ -62,20 +66,30 @@ const Page = (props) => {
         .catch(err => {
           console.log("signal-fail", err);
         });
-    }
-  }, []);
-
-  // 发送频道消息
-  const broadcastMessage = () => {
-    if (msg) {
-      signal.broadcastMessage(createChannelMsg("msg", { txt: msg }));
-      setMsg("");
     } else {
-      message.error("消息不能为空");
+      Message.error("请先登录");
     }
   };
+  // 发送频道消息
+  broadcastMessage = () => {
+    let { msg } = this.state;
+    if (msg) {
+      this.signal.broadcastMessage(createChannelMsg("msg", { txt: msg }));
+      this.setState({
+        msg: ""
+      });
+    } else {
+      Message.error("消息不能为空");
+    }
+  };
+  componentDidMount() {
+    this.initSignal();
+  }
+  render() {
+    let { base, login, user } = this.props;
+    let { uid, msg, channelMsgList } = this.state;
 
-  return (
+    return (
       <div className="pageWrapper">
         <div className="chatWrapper">
           <MsgList uid={uid} msgList={channelMsgList} />
@@ -84,12 +98,12 @@ const Page = (props) => {
               <Col span={18}>
                 <Input
                   value={msg}
-                  onChange={ev => setMsg(ev.target.value)}
-                  onPressEnter={broadcastMessage}
+                  onChange={ev => this.setState({ msg: ev.target.value })}
+                  onPressEnter={this.broadcastMessage}
                 />
               </Col>
               <Col span={6}>
-                <Button type="primary" onClick={broadcastMessage} block>
+                <Button type="primary" onClick={this.broadcastMessage} block>
                   发送
                 </Button>
               </Col>
@@ -114,12 +128,21 @@ const Page = (props) => {
           }
         `}</style>
       </div>
-  );
-};
+    );
+  }
+}
 
+const Page = props => {
+  let { user } = props;
+  return user.init ? <Client {...props} /> : null;
+};
 
 const DvaPage = WithDva(state => {
   return { base: state.base, user: state.user, login: state.login };
 })(Page);
 
-export default () => <PageLayout loginModal><DvaPage/></PageLayout>;
+export default () => (
+  <PageLayout loginModal>
+    <DvaPage />
+  </PageLayout>
+);
