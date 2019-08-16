@@ -5,6 +5,7 @@ export { default as WithDva } from "./withDva";
 export { default as SignalingClient } from "./signalingClient";
 import { Message } from "antd";
 export { default as lodash } from "lodash";
+export { default as classnames } from "classnames";
 
 orgMoment.locale("zh-cn");
 export const moment = orgMoment;

@@ -1,6 +1,6 @@
 import React, { PureComponent, createRef } from "react";
 import { Radio, Button, Carousel, Icon, Input } from "antd";
-import { WithDva, ajax, lodash } from "@/utils";
+import { WithDva, ajax, lodash, classnames } from "@/utils";
 import PageLayout from "@/components/PageLayout";
 
 class Step1 extends PureComponent {
@@ -8,20 +8,40 @@ class Step1 extends PureComponent {
     super(props);
     this.carousel = createRef();
     this.state = {
+      orgTags: [],
+      sex: 0,
       tags: []
     };
   }
+  handleChangeTags = tag => {
+    let { tags } = this.state;
+    if (tags.indexOf(tag) === -1) {
+      this.setState({
+        tags: tags.concat(tag)
+      });
+    }
+  };
+
+  handleSubmit = () => {
+    let { onEnd } = this.props;
+    let { tags, sex } = this.state;
+    onEnd({
+      tags,
+      sex
+    });
+  };
 
   componentDidMount() {
+    // 获取标签列表
     ajax({
       url: "/_/v2/meeting.json",
       method: "get"
     }).then(({ data: { data: { hobby } } }) => {
-      this.setState({ tags: hobby });
+      this.setState({ orgTags: hobby });
     });
   }
   render() {
-    let { tags } = this.state;
+    let { orgTags, sex, tags } = this.state;
     return (
       <div className="step1">
         <div className="wrapper">
@@ -33,27 +53,37 @@ class Step1 extends PureComponent {
           >
             <h2>选择性别</h2>
             <div className="selectSex">
-              <div className="item">
-                <img src={require("@/assets/images/boy.png")} />
+              <div className="item" onClick={() => this.setState({ sex: 0 })}>
+                <div className="imgBox">
+                  <img src={require("@/assets/images/boy.png")} />
+                </div>
                 <div className="radioWrapper">
-                  <Radio>男</Radio>
+                  <Radio checked={sex === 0}>男</Radio>
                 </div>
               </div>
-              <div className="item">
-                <img src={require("@/assets/images/girl.png")} />
+              <div className="item" onClick={() => this.setState({ sex: 1 })}>
+                <div className="imgBox">
+                  <img src={require("@/assets/images/girl.png")} />
+                </div>
                 <div className="radioWrapper">
-                  <Radio>女</Radio>
+                  <Radio checked={sex === 1}>女</Radio>
                 </div>
               </div>
             </div>
             <div className="selectTags">
               <h6>选择标签</h6>
               <Carousel ref={this.carousel}>
-                {lodash.chunk(tags, 8).map((arr, idx) => (
+                {lodash.chunk(orgTags, 8).map((arr, idx) => (
                   <div key={idx} className="carouselItem">
                     <div className="tagWrapper">
                       {arr.map((itm, _idx) => (
-                        <span className="tag" key={`${_idx}_${itm}`}>
+                        <span
+                          className={classnames("tag", {
+                            checked: tags.indexOf(itm) !== -1
+                          })}
+                          key={`${_idx}_${itm}`}
+                          onClick={this.handleChangeTags.bind(this, itm)}
+                        >
                           {itm}
                         </span>
                       ))}
@@ -80,6 +110,7 @@ class Step1 extends PureComponent {
                 size="large"
                 shape="round"
                 style={{ width: 250 }}
+                onClick={this.handleSubmit}
               >
                 开始聊天
               </Button>
@@ -114,6 +145,14 @@ class Step1 extends PureComponent {
             display: flex;
             justify-content: space-between;
             margin-top: 70px;
+          }
+          .selectSex .item {
+            cursor: pointer;
+          }
+          .selectSex .imgBox {
+            height: 165px;
+            display: flex;
+            align-items: flex-end;
           }
           .selectSex .item img {
             display: block;
@@ -162,6 +201,11 @@ class Step1 extends PureComponent {
             float: left;
             margin-left: 22px;
             margin-bottom: 18px;
+            cursor: pointer;
+          }
+          .carouselItem .tag.checked {
+            color: #ff4362;
+            border-color: #ff4362;
           }
           .selectTags
             :global(.ant-carousel)
@@ -412,13 +456,23 @@ class Step3 extends PureComponent {
 }
 class Page extends React.Component {
   state = {
-    step: 3
+    step: 1,
+    // 男
+    sex: 0,
+    // 选择的标签
+    tags: []
   };
   render() {
     let { step } = this.state;
     switch (step) {
       case 1:
-        return <Step1 />;
+        return (
+          <Step1
+            onEnd={({sex, tags}) => {
+              this.setState({ sex, tags, step: 2 });
+            }}
+          />
+        );
       case 2:
         return <Step2 />;
       case 3:
