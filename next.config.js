@@ -41,7 +41,7 @@ module.exports = withCSS(
       config.resolve.alias['@'] = path.join(__dirname, '')
       // 添加文件hash
       config.module.rules.push({
-        test: /\.(txt|jpg|png|svg)$/,
+        test: /\.(txt|jpg|png|gif|svg)$/,
         use: [
           {
             loader: 'file-loader',

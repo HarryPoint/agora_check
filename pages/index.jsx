@@ -1,7 +1,8 @@
 import React, { PureComponent, createRef } from "react";
-import { Radio, Button, Carousel, Icon, Input } from "antd";
-import { WithDva, ajax, lodash, classnames } from "@/utils";
+import { Radio, Button, Carousel, Icon, Input, Row, Col } from "antd";
+import { WithDva, ajax, lodash, classnames, moment } from "@/utils";
 import PageLayout from "@/components/PageLayout";
+import SkillCard from "@/components/SkillCard";
 
 class Step1 extends PureComponent {
   constructor(props) {
@@ -258,7 +259,69 @@ class Step1 extends PureComponent {
   }
 }
 class Step2 extends PureComponent {
+  state = {
+    // 最长等待时间 五分钟
+    max: 1000 * 60 * 5,
+    // 开始等待时间
+    startTime: Date.now(),
+    // 是否正在等待中
+    inProgress: true,
+    // 匹配结果(suc, fail)
+    result: "",
+    // 推荐技能列表
+    recommendList: []
+  };
+
+  // 获取推荐信息
+  getRecommend = () => {
+    ajax({
+      url: "/_/index/recommend.json",
+      method: "get",
+      params: {
+        row: 3
+      }
+    }).then(({ data: { data } }) => {
+      this.setState({
+        recommendList: data
+      });
+    });
+  };
+
+  // 格式化等待时间
+  formatTime = () => {
+    let { startTime } = this.state;
+    let t = moment.duration(Date.now() - startTime);
+    // let h = t.as("hours");
+    let m = t.as("minutes");
+    let s = t.as("seconds");
+    let fixed = a => {
+      let rs = parseInt(a) % 60;
+      return rs < 10 ? `0${rs}` : rs;
+    };
+    return `${fixed(m)}:${fixed(s)}`;
+  };
+  // 开始倒计时
+  startRuning = () => {
+    let { inProgress } = this.state;
+    if (inProgress) {
+      clearInterval(this.timer);
+      this.timer = setInterval(() => {
+        // 强制更新触发倒计时渲染
+        this.forceUpdate();
+      }, 1000);
+    }
+  };
+
+  componentDidMount() {
+    this.startRuning();
+    this.getRecommend();
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.timer);
+  }
   render() {
+    const { inProgress, recommendList } = this.state;
     return (
       <div className="step2">
         <div className="wrapper">
@@ -269,20 +332,62 @@ class Step2 extends PureComponent {
             }}
           >
             <div className="content">
-              <img src={require("@/assets/images/res_fail.png")} alt="" />
-              <div className="btnWrapper">
-                <Button type="primary" size="large" shape="round">
-                  再等一次
-                </Button>
-                <Button
-                  type="primary"
-                  size="large"
-                  ghost
-                  shape="round"
-                  style={{ marginLeft: 28 }}
-                >
-                  离开
-                </Button>
+              {inProgress ? (
+                <div className="mainContent">
+                  <div className="imgWrapper">
+                    <img
+                      src={require("@/assets/images/res_progress.gif")}
+                      alt=""
+                    />
+                    <i>{this.formatTime()}</i>
+                  </div>
+                </div>
+              ) : (
+                <div className="mainContent">
+                  <div className="imgWrapper">
+                    <img src={require("@/assets/images/res_fail.gif")} alt="" />
+                  </div>
+                  <div className="btnWrapper">
+                    <Button type="primary" size="large" shape="round">
+                      再等一次
+                    </Button>
+                    <Button
+                      type="primary"
+                      size="large"
+                      ghost
+                      shape="round"
+                      style={{ marginLeft: 28 }}
+                    >
+                      离开
+                    </Button>
+                  </div>
+                </div>
+              )}
+              <div className="recommendContent">
+                <h4>等太久了？试试这些小姐姐/小哥哥吧~</h4>
+                <div className="recommendList">
+                  <Row>
+                    {recommendList.map(itm => (
+                      <Col span={8} key={itm._id}>
+                        <SkillCard skillInfo={itm} />
+                      </Col>
+                    ))}
+                  </Row>
+                </div>
+                <div className="btnWrapper">
+                  <Button type="primary" size="large" shape="round">
+                    更多
+                  </Button>
+                  <Button
+                    type="primary"
+                    size="large"
+                    ghost
+                    shape="round"
+                    style={{ marginLeft: 28 }}
+                  >
+                    不喜欢？换一批
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -304,8 +409,22 @@ class Step2 extends PureComponent {
           .content {
             text-align: center;
           }
-          .content img {
-            transform: translate(-20px, -30px);
+          .content .imgWrapper {
+            transform: translate(4px, -30px);
+            position: relative;
+          }
+          .content .imgWrapper i {
+            position: absolute;
+            right: 110px;
+            bottom: 70px;
+            height: 13px;
+            font-family: PingFangSC-Medium;
+            font-size: 16px;
+            font-weight: normal;
+            font-stretch: normal;
+            letter-spacing: 0px;
+            color: #ffffff;
+            font-style: normal;
           }
         `}</style>
       </div>
@@ -456,7 +575,7 @@ class Step3 extends PureComponent {
 }
 class Page extends React.Component {
   state = {
-    step: 1,
+    step: 2,
     // 男
     sex: 0,
     // 选择的标签
@@ -468,7 +587,7 @@ class Page extends React.Component {
       case 1:
         return (
           <Step1
-            onEnd={({sex, tags}) => {
+            onEnd={({ sex, tags }) => {
               this.setState({ sex, tags, step: 2 });
             }}
           />

@@ -65,6 +65,7 @@ class Client extends PureComponent {
             .join(waitingChannelId)
             .then(res => {
               console.log("channel-success", res);
+              
               // 收到频道消息
               this.client.channelEmitter.on(
                 "onMessageChannelReceive",
@@ -78,6 +79,12 @@ class Client extends PureComponent {
                       timestamp: new Date().getTime()
                     })
                   }));
+                }
+              );
+              this.client.channelEmitter.on(
+                "onChannelJoined",
+                () => {
+                  console.log('onChannelJoined')
                 }
               );
               // 加入频道消息
